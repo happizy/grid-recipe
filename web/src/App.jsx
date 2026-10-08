@@ -299,7 +299,7 @@ function GraphEditor() {
   return (
     <div className="app-shell" onClick={() => creationMenu && setCreationMenu(null)}>
       <header className="topbar">
-        <div><p className="eyebrow">Éditeur Michael Chu</p><h1>Grid Recipe</h1></div>
+        <div><p className="eyebrow">Inspiré par Micheal Chu</p><h1>Éditeur de recettes</h1></div>
         <div className="header-actions">
           <button type="button" className="button secondary" onClick={() => replaceGraph(INITIAL_RECIPE)}>Nouvelle recette</button>
           <button type="button" className="button secondary" onClick={() => fileInput.current?.click()}>Importer</button>
