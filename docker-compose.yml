@@ -1,0 +1,18 @@
+services:
+  grid-recipe:
+    build:
+      context: .
+      args:
+        TYPST_VERSION: "0.15.1"
+        ALEGREYA_REVISION: "40478177239cbf3bac07908ef0738afee0f72be7"
+    ports:
+      - "8000:8000"
+    environment:
+      RENDER_TIMEOUT_SECONDS: "30"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

@@ -19,6 +19,14 @@ class RecipeError(ValueError):
     """Raised when a recipe document does not match the expected schema."""
 
 
+class RenderError(RuntimeError):
+    """Raised when Typst cannot compile an otherwise valid recipe."""
+
+
+class RendererUnavailable(RenderError):
+    """Raised when the Typst renderer is missing or does not respond in time."""
+
+
 @dataclass(frozen=True)
 class Ingredient:
     name: str
@@ -381,6 +389,7 @@ def render_recipe(
     width_mm: float = 280.0,
     ppi: int = 144,
     typst_binary: str = "typst",
+    timeout_seconds: float | None = None,
 ) -> tuple[Path, Path]:
     if not math.isfinite(width_mm) or width_mm <= 0:
         raise RecipeError("page width must be greater than zero")
@@ -416,21 +425,31 @@ def render_recipe(
             str(output_typst),
             str(temporary_path),
         ]
-        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout_seconds,
+        )
         if result.returncode != 0:
             detail = result.stderr.strip() or result.stdout.strip() or "unknown Typst error"
-            raise RecipeError(f"Typst compilation failed:\n{detail}")
+            raise RenderError(f"Typst compilation failed:\n{detail}")
         if not temporary_path.is_file() or temporary_path.stat().st_size == 0:
-            raise RecipeError("Typst completed without producing a PNG")
+            raise RenderError("Typst completed without producing a PNG")
         os.replace(temporary_path, output_png)
         output_png.chmod(0o644)
         temporary_path = None
+    except subprocess.TimeoutExpired as error:
+        raise RendererUnavailable(
+            f"Typst compilation exceeded the {timeout_seconds:g}-second limit"
+        ) from error
     except FileNotFoundError as error:
-        raise RecipeError(
+        raise RendererUnavailable(
             f"Typst executable not found: {typst_binary!r}; install Typst or add it to PATH"
         ) from error
     except OSError as error:
-        raise RecipeError(f"cannot write output PNG {output_png}: {error}") from error
+        raise RenderError(f"cannot write output PNG {output_png}: {error}") from error
     finally:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
@@ -501,7 +520,7 @@ def main(argv: list[str] | None = None) -> int:
             ppi=arguments.ppi,
             typst_binary=arguments.typst_bin,
         )
-    except RecipeError as error:
+    except (RecipeError, RenderError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
 

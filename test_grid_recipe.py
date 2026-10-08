@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import shutil
 import struct
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from grid_recipe import (
     Action,
     Ingredient,
     RecipeError,
+    RendererUnavailable,
     build_layout,
     generate_typst,
     parse_recipe,
@@ -132,6 +135,30 @@ class LayoutTests(unittest.TestCase):
         self.assertIn('A #recipe \\"with\\" \\\\ symbols', source)
         self.assertIn('Line one\\nLine two', source)
         self.assertIn('fish #1', source)
+
+
+class RenderFailureTests(unittest.TestCase):
+    def test_reports_a_typst_timeout_and_cleans_the_temporary_png(self) -> None:
+        recipe = parse_recipe(
+            {
+                "title": "Slow soup",
+                "flow": {
+                    "step": "Serve",
+                    "inputs": [{"name": "stock", "amount": "500 ml"}],
+                },
+            }
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "soup.png"
+            with patch(
+                "grid_recipe.subprocess.run",
+                side_effect=subprocess.TimeoutExpired("typst", 0.01),
+            ):
+                with self.assertRaisesRegex(RendererUnavailable, "exceeded"):
+                    render_recipe(recipe, output, timeout_seconds=0.01)
+
+            self.assertFalse(output.exists())
+            self.assertEqual(list(Path(directory).glob(".*.png")), [])
 
 
 @unittest.skipUnless(shutil.which("typst"), "Typst is not installed")

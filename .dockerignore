@@ -1,0 +1,12 @@
+.git
+.gitignore
+.DS_Store
+.venv
+__pycache__
+*.py[cod]
+*.png
+*.typ
+recettes
+test_*.py
+web/node_modules
+web/dist
