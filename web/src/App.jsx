@@ -4,7 +4,6 @@ import {
   ConnectionMode,
   Controls,
   Handle,
-  MarkerType,
   MiniMap,
   Position,
   ReactFlow,
@@ -181,8 +180,7 @@ function GraphEditor() {
 
   const displayEdges = useMemo(() => edges.map((edge) => ({
     ...edge,
-    type: "smoothstep",
-    markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18 },
+    type: "default",
   })), [edges]);
 
   const onNodesChange = useCallback((changes) => setNodes((current) => applyNodeChanges(changes, current)), []);
@@ -339,7 +337,7 @@ function GraphEditor() {
               onReconnect={onReconnect} onConnectEnd={openCreationMenu} isValidConnection={isValidConnection}
               connectionMode={ConnectionMode.Loose} deleteKeyCode={["Backspace", "Delete"]}
               fitView fitViewOptions={{ padding: 0.18 }} minZoom={0.25} maxZoom={1.8}
-              defaultEdgeOptions={{ type: "smoothstep" }} proOptions={{ hideAttribution: true }}
+              defaultEdgeOptions={{ type: "default" }} proOptions={{ hideAttribution: true }}
             >
               <Background variant={BackgroundVariant.Dots} gap={22} size={1.25} color="#b9c2bb" />
               <MiniMap pannable zoomable nodeColor={(node) => node.type === "ingredient" ? "#dfeee2" : "#f5eee3"} />
@@ -366,10 +364,13 @@ function GraphEditor() {
             <button type="button" className="button primary render-button" disabled={!graphResult.ok || renderState.busy} onClick={renderPng}>{renderState.busy ? "Compilation…" : "Créer le PNG"}</button>
             <p className="status-line">{renderState.message || (!graphResult.ok ? "Reliez tous les nœuds pour activer le rendu." : "Prêt à compiler.")}</p>
           </section>
-
-          {previewUrl && <section className="side-card preview-card"><div className="card-heading"><h2>Aperçu</h2><a href={previewUrl} download={safeFilename(lastValidRecipe.current.title, "png")}>Télécharger</a></div><img src={previewUrl} alt="Recette compilée en PNG" /></section>}
         </aside>
       </main>
+
+      {previewUrl && <section className="side-card result-panel">
+        <div className="card-heading"><div><p className="eyebrow">Résultat</p><h2>Image générée</h2></div><a href={previewUrl} download={safeFilename(lastValidRecipe.current.title, "png")}>Télécharger le PNG</a></div>
+        <div className="result-stage"><img src={previewUrl} alt="Recette compilée en PNG" /></div>
+      </section>}
 
       {creationMenu && <div className="creation-menu" style={{ left: creationMenu.clientX, top: creationMenu.clientY }} onClick={(event) => event.stopPropagation()}>
         <p>Créer et relier</p>

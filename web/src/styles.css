@@ -149,7 +149,9 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
 .render-options { margin-top: 9px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .render-options input { margin-top: 4px; padding: 7px; }
 .render-button { width: 100%; }
-.preview-card img { display: block; width: 100%; max-height: 360px; object-fit: contain; border: 1px solid var(--line); border-radius: 9px; background: #ecebe5; }
+.result-panel { margin: 0 16px 16px; }
+.result-stage { padding: 18px; border: 1px solid var(--line); border-radius: 11px; background: #ecebe5; overflow: auto; text-align: center; }
+.result-stage img { display: block; max-width: 100%; max-height: 85vh; margin: 0 auto; object-fit: contain; border-radius: 7px; box-shadow: 0 8px 30px rgba(35,45,38,.14); }
 
 .creation-menu {
   position: fixed;
@@ -177,6 +179,8 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
   .header-actions { width: 100%; }
   .header-actions .button { flex: 1; padding: 8px; font-size: 11px; }
   .workspace { padding: 8px; }
+  .result-panel { margin: 0 8px 8px; }
+  .result-stage { padding: 8px; }
   .graph-panel { height: 820px; border-radius: 11px; }
   .recipe-meta { grid-template-columns: 1fr; gap: 11px; padding: 12px; }
   .graph-toolbar { gap: 8px; overflow-x: auto; }
